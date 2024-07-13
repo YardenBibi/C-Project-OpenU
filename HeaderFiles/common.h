@@ -4,17 +4,16 @@
 #include "globals.h"
 
 /**
- * This function allocates new memory and handles the errors that might occur
- * @param object_size the amount of memory to allocate
- * @return a void pointer of the allocated memory, or NULL if the allocation failed
+ * This function allocates a memory block and displays an error in case the process fails.
+ * @param object_size - the size of the memory block to allocate
+ * @return a void pointer to the allocated memory, or NULL if the allocation fails.
  */
-void *(long object_size);
+void *manual_malloc(long object_size);
 
 /**
- * This function saves a new name for a file. It deletes the content of the name after the '.' if one exists
- * and adds a new ending
- * @param file_name string of the beginning of the new file name
- * @param ending string of the ending of the new file name
- * @return a string with the new file name
+  * This function generates a new file name, If the original file name does not contain a '.', the entire file name is used as the base.
+ * @param orig_name The original file name
+ * @param new_end The new extension or suffix to be appended to the base name
+ * @return A pointer to the newly allocated string containing the new file name
  */
-char *add_new_file(char *file_name, char *ending);
+char *generate_file_name(char *orig_name, char *new_end);
