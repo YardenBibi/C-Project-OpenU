@@ -8,5 +8,5 @@ int main (int argc, cher *argv[]){
     printf("handle .as files (split the macros)");
     printf("continue if fails");
     printf("Perform first+second pass");
-  
+    printf("test");
   }
