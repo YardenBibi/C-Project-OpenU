@@ -28,3 +28,8 @@ char *generate_file_name(char *orig_name, char *new_end) {
     snprintf(new_file_name, MAX_LINE_LENGTH, "%.*s%s", (int)base_length, orig_name, new_end);
     return new_file_name;
 }
+
+char *delete_extra_spaces(char as_file[]){
+    return; 
+}
+

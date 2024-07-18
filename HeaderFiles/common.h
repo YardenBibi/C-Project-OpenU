@@ -17,3 +17,5 @@ void *manual_malloc(long object_size);
  * @return A pointer to the newly allocated string containing the new file name
  */
 char *generate_file_name(char *orig_name, char *new_end);
+
+char *delete_extra_spaces(char as_file[]);
