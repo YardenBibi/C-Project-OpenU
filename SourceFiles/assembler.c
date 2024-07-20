@@ -10,10 +10,9 @@ int main (int argc, cher *argv[]){
   for (i=1; i<argc;i++){
     current_file = argv[argc];
     dot_as_file = generate_file_name(current_file, ".as");
-
-
-    printf("handle .as files (split the macros)");
-    printf("continue if fails");
+    if (!macr_pre_process(dot_as_file)){
+      continue;
+    }
     printf("Perform first+second pass");
   
   }

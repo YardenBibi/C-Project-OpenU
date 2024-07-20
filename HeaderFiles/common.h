@@ -18,4 +18,6 @@ void *manual_malloc(long object_size);
  */
 char *generate_file_name(char *orig_name, char *new_end);
 
-char *delete_extra_spaces(char as_file[]);
+char *delete_extra_spaces_from_str(char str[]);
+
+char *delete_extra_spaces_from_file(char as_file[]);
