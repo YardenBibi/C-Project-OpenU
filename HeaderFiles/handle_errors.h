@@ -4,3 +4,5 @@
 void input_errors(char file_name[], int line, char error_msg[]);
 
 void general_errors(char error_msg[]);
+
+#endif

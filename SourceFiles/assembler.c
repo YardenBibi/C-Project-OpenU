@@ -4,7 +4,7 @@
 
 
 
-int main (int argc, cher *argv[]){
+int main (int argc, char *argv[]){
   int i; 
   char *dot_as_file, *current_file;
   for (i=1; i<argc;i++){

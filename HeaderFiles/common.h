@@ -21,3 +21,5 @@ char *generate_file_name(char *orig_name, char *new_end);
 char *delete_extra_spaces_from_str(char str[]);
 
 char *delete_extra_spaces_from_file(char as_file[]);
+
+#endif
