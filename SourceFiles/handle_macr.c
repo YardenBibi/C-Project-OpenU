@@ -7,6 +7,7 @@
 int macr_pre_process(char as_file[]){
     char *no_extra_space_file;
     no_extra_space_file = delete_extra_spaces_from_file(as_file);
+    printf("No extra spaces file: %s\n", no_extra_space_file);
     return 1;
     
 }

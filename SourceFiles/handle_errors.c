@@ -5,9 +5,9 @@
 #include "../HeaderFiles/common.h"
 
 void input_errors(char file_name[], int line, char error_msg[]){
-    printf("Error in file %s, line number:%d: %s", file_name, line, error_msg);
+    printf("Error in file %s, line number:%d: %s\n", file_name, line, error_msg);
 }
 
 void general_errors(char error_msg[]){
-    printf("Error: %s", error_msg);
+    printf("Error: %s\n", error_msg);
 }
