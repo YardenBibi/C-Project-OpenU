@@ -78,8 +78,7 @@ char *delete_extra_spaces_from_file(char as_file[]){
     file = fopen(as_file , "r");
 
     if (file==NULL){
-        printf("Couldn't open file - Error\n");
-        /*need to add error*/
+        general_errors("Couldn't open file");
         return NULL;
     }
 
@@ -90,8 +89,7 @@ char *delete_extra_spaces_from_file(char as_file[]){
         fclose(file);
         remove(output_file);
         free(output_file);
-        printf("Couldn't open file - Error\n");
-        /*need to add error*/
+        general_errors("Couldn't open file");       
         return NULL;
     }
 

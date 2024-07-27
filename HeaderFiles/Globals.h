@@ -13,15 +13,15 @@
 /* arbitrary very big number for line length */
 #define BIG_NUMBER_CONST 1000
 
-#define OPCODES_COUNT 16
+#define OPCODES_CNT 16
 
-#define REG_COUNT 8
+#define REG_CNT 8
 
 #define WORD_LEN 15
 
 #define ARE_BITS 3
 
-#define INSTRUCTIONS_COUNT 4
+#define INSTR_CNT 4
 
 #define MAX_NUM ((1 << (WORD_LEN-1)) - 1)
 
