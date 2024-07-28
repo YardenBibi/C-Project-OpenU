@@ -10,4 +10,6 @@ int name_as_inst(char *str);
 
 int which_opcode(char *str);
 
-int which_reg(char *str)
+int which_reg(char *str);
+
+#endif

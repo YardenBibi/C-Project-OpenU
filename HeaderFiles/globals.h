@@ -11,7 +11,7 @@
 #define IC_INIT_VALUE 100
 
 /* arbitrary very big number for line length */
-#define BIG_NUMBER_CONST 1000
+#define INITIAL_BUFFER_SIZE 1000
 
 #define OPCODES_CNT 16
 

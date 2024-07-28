@@ -11,8 +11,7 @@
 void *manual_malloc(long object_size) {
     void *malloc_result = malloc(object_size);
     if (malloc_result == NULL) {
-       printf("failed to allocate memory");
-      /*print_internal_error(error_1);*/
+       general_errors("failed to allocate memory");
     }
     return malloc_result;
 }
@@ -72,7 +71,7 @@ char *delete_extra_spaces_from_str(char str[]){
 
 char *delete_extra_spaces_from_file(char as_file[]){
     char *output_file, *fixed_line;
-    char buffer[1000];
+    char buffer[INITIAL_BUFFER_SIZE];
     int line;
     FILE *file, *file_temp;
     file = fopen(as_file , "r");
