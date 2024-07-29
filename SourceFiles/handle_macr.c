@@ -7,6 +7,122 @@
 #include "../HeaderFiles/assembly_utils.h"
 #include "../HeaderFiles/handle_macr.h"
 
+int remove_macros(char *filename) {
+    char line[MAX_LINE_LENGTH], error_msg[INITIAL_BUFFER_SIZE];
+    int in_macro_block = 0;
+
+    FILE *file,*temp_file;
+    file = fopen(filename, "r");
+    if (!file) {
+        sprintf(error_msg,"Couldn't open file %s", filename);
+        general_errors(error_msg);
+        return 0;
+    }
+
+    temp_file = tmpfile();
+    if (!temp_file) {
+        general_errors("Failed to create temporary file");
+        fclose(file);
+        return 0;
+    }
+
+
+    while (fgets(line, sizeof(line), file)) {
+        if (strncmp(line, "macr", 4) == 0) {
+            in_macro_block = 1;
+        }
+
+        if (strncmp(line, "endmacr", 7) == 0) {
+            in_macro_block = 0;
+            continue; 
+        }
+
+        if (!in_macro_block) {
+            fputs(line, temp_file);
+        }
+    }
+
+    fclose(file);
+    rewind(temp_file);
+
+    file = fopen(filename, "w");
+    if (!file) {
+        sprintf(error_msg,"Couldn't open file %s", filename);
+        general_errors(error_msg);
+        fclose(temp_file);
+        return 0;
+    }
+
+    while (fgets(line, sizeof(line), temp_file)) {
+        fputs(line, file);
+    }
+
+    fclose(file);
+    fclose(temp_file);
+    return 1;
+}
+
+
+int replace_macros(macr_node *head_macr, char *no_extra_space_file){
+    char line[MAX_LINE_LENGTH], error_msg[INITIAL_BUFFER_SIZE];
+    int replaced;
+    macr_node *macr;
+    FILE *file,*temp_file;
+    if (!remove_macros(no_extra_space_file)){
+        return 0;
+    }
+    file = fopen(no_extra_space_file, "r");
+    if (!file) {
+        sprintf(error_msg,"Couldn't open file %s", no_extra_space_file);
+        general_errors(error_msg);
+        return 0;
+    }
+
+    temp_file = tmpfile();
+    if (!temp_file) {
+        general_errors("Failed to create temporary file");
+        fclose(file);
+        return 0;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        replaced = 0;
+        macr = head_macr;
+        while (macr != 0)
+        {
+            if (strncmp(line, macr->macr_name, strlen(macr->macr_name)) == 0 && (line[strlen(macr->macr_name)] == '\0' || line[strlen(macr->macr_name)] == '\n')) {
+                fputs(macr->macr_code, temp_file);
+                replaced = 1;
+                break;
+            }
+            macr = macr->next;
+
+        }
+        if (!replaced) {
+            fputs(line, temp_file);
+        }
+    }
+
+    fclose(file);
+    rewind(temp_file);
+
+    file = fopen(no_extra_space_file, "w");
+    if (!file) {
+        sprintf(error_msg,"Couldn't open file %s", no_extra_space_file);
+        general_errors(error_msg);
+        fclose(temp_file);
+        return 0;
+    }
+
+    while (fgets(line, sizeof(line), temp_file)) {
+        fputs(line, file);
+    }
+
+    fclose(file);
+    fclose(temp_file);
+    return 1;
+}
+
 
 int ensure_macr_order(macr_node *head_macr, char *no_extra_space_file){
     char buffer[MAX_LINE_LENGTH], error_msg[INITIAL_BUFFER_SIZE];
@@ -16,7 +132,8 @@ int ensure_macr_order(macr_node *head_macr, char *no_extra_space_file){
 
     file = fopen(no_extra_space_file , "r");
     if (file==NULL){
-        general_errors("Couldn't open file");
+        sprintf(error_msg,"Couldn't open file %s", no_extra_space_file);
+        general_errors(error_msg);
         return 0;
     }
 
@@ -43,14 +160,15 @@ int ensure_macr_order(macr_node *head_macr, char *no_extra_space_file){
 }
 
 int build_macros_list(macr_node **head_macr, char *no_extra_space_file){
-    char buffer[MAX_LINE_LENGTH];
+    char buffer[MAX_LINE_LENGTH], error_msg[INITIAL_BUFFER_SIZE];
     int line=0, current_macr_line;
     FILE *file; 
     char *macr_name, *macr_code; 
 
     file = fopen(no_extra_space_file , "r");
     if (file==NULL){
-        general_errors("Couldn't open file");
+        sprintf(error_msg,"Couldn't open file %s", no_extra_space_file);
+        general_errors(error_msg);
         return 0;
     }
     while (fgets(buffer, MAX_LINE_LENGTH, file) != NULL) {
@@ -131,7 +249,7 @@ char* get_macr_code(char * file_name,FILE *file, int *line_number) {
             content_size *= 2;
             new_content = realloc(content, content_size);
             if (new_content == NULL) {
-                perror("Failed to reallocate memory");
+                general_errors("Failed to reallocate memory");
                 free(content);
                 return NULL;
             }
@@ -155,27 +273,17 @@ int macr_pre_process(char as_file[]){
         free_nodes_list(head_macr);
         return 0;
     }
+    /*
     if (!ensure_macr_order(head_macr,no_extra_space_file)){
         free_nodes_list(head_macr);
         return 0;
     }
-    return 1;
+    */
+    if (!replace_macros(head_macr,no_extra_space_file)){
+        return 0;
+    }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    free_nodes_list(head_macr);
     return 1;
     
 }

@@ -16,9 +16,11 @@ int main (int argc, char *argv[]){
       printf("The input %s does not exist, IGNORING\n", dot_as_file);
       continue;
     }
+    printf("Started parsing %s\n", dot_as_file);
     if (!macr_pre_process(dot_as_file)){
       continue;
     }
+    printf("Created AM file!\n");
     printf("Perform first+second pass\n");
   
   }

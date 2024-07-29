@@ -25,10 +25,7 @@ opcode OPCODES[] = {
         {"stop", 0}
 };
 
-/* Define the instructions */
 char *INSTUCTIONS[] = {".data", ".string", ".entry", ".extern"};
-
-/* Define the registers */
 char *REGS[] = {"@r0", "@r1", "@r2", "@r3", "@r4", "@r5", "@r6", "@r7"}; 
 
 int name_as_inst(char *str) {

@@ -71,24 +71,26 @@ char *delete_extra_spaces_from_str(char str[]){
 
 char *delete_extra_spaces_from_file(char as_file[]){
     char *output_file, *fixed_line;
-    char buffer[INITIAL_BUFFER_SIZE];
+    char buffer[INITIAL_BUFFER_SIZE], error_msg[INITIAL_BUFFER_SIZE];
     int line;
     FILE *file, *file_temp;
     file = fopen(as_file , "r");
 
     if (file==NULL){
-        general_errors("Couldn't open file");
+        sprintf(error_msg,"Couldn't open file %s", as_file);
+        general_errors(error_msg);
         return NULL;
     }
 
-    output_file = generate_file_name(as_file, ".tmp");
+    output_file = generate_file_name(as_file, "am");
     file_temp = fopen(output_file, "w");
 
     if (file_temp==NULL){
         fclose(file);
         remove(output_file);
         free(output_file);
-        general_errors("Couldn't open file");       
+        sprintf(error_msg,"Couldn't open file %s", as_file);
+        general_errors(error_msg);    
         return NULL;
     }
 
@@ -117,13 +119,3 @@ char *delete_extra_spaces_from_file(char as_file[]){
     fclose(file_temp);
     return output_file;
 }
-
-
-
-    
-    
-
-
-
-
-
