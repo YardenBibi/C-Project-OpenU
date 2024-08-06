@@ -263,15 +263,15 @@ char* get_macr_code(char * file_name,FILE *file, int *line_number) {
     return content;
 }
 
-int macr_pre_process(char as_file[]){
+char *macr_pre_process(char as_file[]){
     char *am_file;
     macr_node *head_macr = NULL;
     am_file = delete_extra_spaces_from_file(as_file);
     if (am_file==NULL)
-        return 0;
+        return NULL;
     if (!build_macros_list(&head_macr,am_file)){
         free_nodes_list(head_macr);
-        return 0;
+        return NULL;
     }
     /*
     if (!ensure_macr_order(head_macr,am_file)){
@@ -280,10 +280,11 @@ int macr_pre_process(char as_file[]){
     }
     */
     if (!replace_macros(head_macr,am_file)){
-        return 0;
+        free_nodes_list(head_macr);
+        return NULL;
     }
 
     free_nodes_list(head_macr);
-    return 1;
+    return am_file;
     
 }

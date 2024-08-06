@@ -82,7 +82,7 @@ char *delete_extra_spaces_from_file(char as_file[]){
         return NULL;
     }
 
-    output_file = generate_file_name(as_file, "am");
+    output_file = generate_file_name(as_file, ".am");
     file_temp = fopen(output_file, "w");
 
     if (file_temp==NULL){

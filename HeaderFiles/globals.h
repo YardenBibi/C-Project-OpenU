@@ -23,6 +23,8 @@
 
 #define INSTR_CNT 4
 
+#define MAX_IC 4095
+
 #define MAX_NUM ((1 << (WORD_LEN-1)) - 1)
 
 #define MIN_NUM (-(1 << (WORD_LEN-1)))
