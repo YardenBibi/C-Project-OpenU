@@ -25,6 +25,7 @@ int main (int argc, char *argv[]){
     printf("Created AM file!\n");
 
     printf("Perform first+second pass\n");
+    
     /*first_second_pass(dot_am_file);*/
     printf("DONE\n");
   }
