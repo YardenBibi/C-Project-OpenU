@@ -35,3 +35,26 @@ void insert_general_label(gen_label_table **table, int cnt, instruction *inst, i
     }
 
 }
+
+int insert_label_table(label_table **label_tbl, int labels_cnt, char *label, int counter, int line, int is_data_line,char *error_msg){
+    label_table *temp;
+    temp = *label_tbl;
+
+    *label_tbl = realloc(*label_tbl, labels_cnt * sizeof(label_table));
+    if (*label_tbl == NULL) {
+        strcpy(error_msg, "Failed to allocate memory");
+        free(temp);
+        return 0;
+    }
+
+    (*label_tbl + labels_cnt - 1)->is_data_line = is_data_line;
+    (*label_tbl + labels_cnt - 1)->address = counter;
+    (*label_tbl + labels_cnt - 1)->line = line;
+    (*label_tbl + labels_cnt - 1)->name = malloc((strlen(label) + 1) * sizeof(char));
+    if ((*label_tbl + labels_cnt - 1)->name == NULL) {
+        strcpy(error_msg, "Failed to allocate memory");
+        return 0;
+    }
+    strcpy((*label_tbl + labels_cnt - 1)->name, label);
+    return 1;
+}

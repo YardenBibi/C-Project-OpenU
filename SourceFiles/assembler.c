@@ -26,7 +26,7 @@ int main (int argc, char *argv[]){
 
     printf("Perform first+second pass\n");
     
-    /*first_second_pass(dot_am_file);*/
+    first_second_pass(dot_am_file);
     printf("DONE\n");
   }
   return 0;

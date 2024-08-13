@@ -23,6 +23,12 @@ typedef struct instruction {
     int is_entry;    
 } instruction;
 
+typedef struct converted_line {
+    unsigned short short_num; /* The numerical representation of the converted line */
+    char *label; /* An optional label associated with the line */
+    int line_num; /* The corresponding assembly line number */
+} converted_line;
+
 /**
  * This function checks if a given string matches any known instruction names.
  * It compares the provided string against a list of known instruction names and returns a flag indicating
@@ -108,5 +114,28 @@ int validate_label_declaration(char *label);
 int build_array(char *buffer, instruction *inst, char *error_msg);
 
 int build_string(char *buffer, instruction *inst, char *error_msg);
+
+void add_machine_code_inst(converted_line **inst_lines, instruction *inst, int *DC, int line);
+
+int add_machine_code_cmd(converted_line **code_lines, unsigned short num, char *str, int *IC, int line);
+
+int inc_mem(converted_line **lines, int counter);
+
+command *create_command(char *buffer, char *error_msg);
+
+int is_number(char *str);
+
+int is_operand_number(char *str);
+
+int is_legal_operand(char *arg);
+
+int is_legal_second_operand(char *arg);
+
+unsigned short convert_reg_to_binary(command *cmd, int is_src);
+
+int add_information_line(converted_line **code_lines, command *cmd, int *IC, int is_src, int line);
+
+unsigned short command_to_short(gen_label_table **externs_table,int externs_cnt, command *cmd);
+
 
 #endif

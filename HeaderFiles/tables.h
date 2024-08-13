@@ -33,5 +33,6 @@ typedef struct gen_label_table {
  */
 void insert_general_label(gen_label_table **table, int cnt, instruction *inst, int line);
 
+int insert_label_table(label_table **label_tbl, int labels_cnt, char *label, int counter, int line, int is_data_line,char *error_msg);
 
 #endif
