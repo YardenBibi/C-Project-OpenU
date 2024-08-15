@@ -8,7 +8,7 @@
 #define MAX_LINE_LENGTH 81
 
 /* Default IC value */
-#define IC_INIT_VALUE 100
+#define IC_INIT 100
 
 /* arbitrary very big number for line length */
 #define INITIAL_BUFFER_SIZE 1000
