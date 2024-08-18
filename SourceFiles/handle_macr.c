@@ -124,8 +124,9 @@ int replace_macros(macr_node *head_macr, char *am_file){
 }
 
 
-int ensure_macr_order(macr_node *head_macr, char *am_file){
-    char buffer[MAX_LINE_LENGTH], error_msg[INITIAL_BUFFER_SIZE];
+int ensure_macr_no_label(macr_node *head_macr, char *am_file){
+    char *colon_pos,prefix[MAX_LINE_LENGTH], buffer[MAX_LINE_LENGTH], error_msg[INITIAL_BUFFER_SIZE];
+    size_t prefix_len;
     int line=0;
     FILE *file; 
     macr_node *macr;
@@ -139,21 +140,23 @@ int ensure_macr_order(macr_node *head_macr, char *am_file){
 
     while (fgets(buffer, MAX_LINE_LENGTH, file) != NULL) {
         line++;
-        if (strstr(buffer, "macr") != NULL) {
-            continue;
-        }  
-        macr = head_macr;
-        while (macr != NULL)
-        {
-            if (strstr(buffer, macr->macr_name) != NULL && line<macr->macr_row){
-                sprintf(error_msg,"The macro '%s' is called before it's decleration.\n", macr->macr_name);
+        colon_pos = strchr(buffer, ':');  
+        if (colon_pos != NULL) {
+            prefix_len = colon_pos - buffer;
+            strncpy(prefix, buffer, prefix_len);
+            prefix[prefix_len] = '\0';
+            macr = head_macr;
+            while (macr != NULL)
+            {
+            if (strcmp(prefix, macr->macr_name) == 0){
+                sprintf(error_msg,"The macro '%s', has the same name as the label defined on line %d.", macr->macr_name,line);
                 input_errors(am_file,line,error_msg);
                 return 0;
             }
             macr = macr->next;
 
+            }
         }
-        
     }
 
     return 1;
@@ -273,12 +276,12 @@ char *macr_pre_process(char as_file[]){
         free_nodes_list(head_macr);
         return NULL;
     }
-    /*
-    if (!ensure_macr_order(head_macr,am_file)){
+    
+    if (!ensure_macr_no_label(head_macr,am_file)){
         free_nodes_list(head_macr);
         return 0;
     }
-    */
+    
     if (!replace_macros(head_macr,am_file)){
         free_nodes_list(head_macr);
         return NULL;

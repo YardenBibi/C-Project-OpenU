@@ -62,16 +62,17 @@ char* get_macr_code(char * file_name,FILE *file, int *line_number);
 int is_valid_macr(int line, char *am_file, char **macr_name);
 
 /**
- * This function ensures macros are used only after their declaration in a file.
- * It reads a file line by line to verify that macros are not used before their declarations.
- * If a macro is called before its declaration, it prints an error message with the line number where the issue occurs.
- * @param head_macr Pointer to the head of a linked list of macros. Each `macr_node` contains a macro name
- *                  and its declaration line number.
- * @param am_file   Pointer to the null-terminated string representing the name of the file to be checked.
- * @return 1 if all macros are used after their declarations, or 0 if a macro is used before its declaration.
- *         On failure, an appropriate error message is printed using `input_errors`.
+ * This function checks for conflicts between macro names and labels in a specified file.
+ * It reads the file line by line, looking for labels (defined as strings before a colon ':'). If a label matches
+ * any macro name in the linked list, an error is reported, and the function returns 0. If no conflicts are found,
+ * the function completes successfully and returns 1.
+ * @param head_macr Pointer to the head of a linked list of macro nodes. Each node contains a macro name
+ *                  (`macr_name`) to be checked against labels in the file.
+ * @param am_file Pointer to the null-terminated string representing the name of the file to be checked.
+ *                The file is opened and read line by line to identify potential label conflicts.
+ * @return 1 if no conflicts are found; 0 if a conflict is detected or if the file cannot be opened.
  */
-int ensure_macr_order(macr_node *head_macr, char *am_file);
+int ensure_macr_no_label(macr_node *head_macr, char *am_file);
 
 /**
  * This function replaces macro definitions in a file with their corresponding code.

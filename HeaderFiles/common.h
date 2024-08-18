@@ -38,4 +38,6 @@ char *delete_extra_spaces_from_str(char str[]);
  */
 char *delete_extra_spaces_from_file(char as_file[]);
 
+void delete_extra_line(char *filnename);
+
 #endif

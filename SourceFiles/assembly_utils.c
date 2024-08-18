@@ -223,16 +223,24 @@ int build_array(char *buffer, instruction *inst, char *error_msg){
     inst->nums = (short *)malloc(inst->len * sizeof(short));
     i=0;
     num = strtok(array_str, ",");
-    number = (short) (atoi(num));
-        if (number > MAX_NUM || number < MIN_NUM) {
-            strcpy(error_msg, "Illegal .data instruction - a number is too big");
+    number = (int) (atoi(num));
+        if (number > MAX_NUM) {
+            sprintf(error_msg, "Illegal .data instruction - the number %s is too big",num);
+            return 0;
+        } 
+        else if (number < MIN_NUM) {
+            sprintf(error_msg, "Illegal .data instruction - the number %s is too small",num);
             return 0;
         } 
         inst->nums[i++]= (short) (atoi(num));
     while ((num = strtok(NULL, ", \n")) != NULL) {
-        number = (short) (atoi(num));
-        if (number > MAX_NUM || number < MIN_NUM) {
-            strcpy(error_msg, "Illegal .data instruction - a number is too big");
+        number = (int) (atoi(num));
+        if (number > MAX_NUM) {
+            sprintf(error_msg, "Illegal .data instruction - the number %s is too big",num);
+            return 0;
+        } 
+        else if (number < MIN_NUM) {
+            sprintf(error_msg, "Illegal .data instruction - the number %s is too small",num);
             return 0;
         } 
         inst->nums[i++]= (short) (atoi(num));
@@ -244,9 +252,7 @@ int build_array(char *buffer, instruction *inst, char *error_msg){
 int build_string(char *buffer, instruction *inst, char *error_msg){
     char *string;
     int second_pos = -1, str_len, i;
-    printf("BUILDING STRING!!!\n");
     string = strtok(NULL, "\n");
-    printf("STRING:%s.\n",string);
     if (string[0] != '"') {
         strcpy(error_msg, "Illegal .string declaration - no opening quote");
         return 0;
@@ -272,7 +278,6 @@ int build_string(char *buffer, instruction *inst, char *error_msg){
     for (i = 1; i < inst->len; i++) { 
         inst->nums[i - 1] = (short)string[i];
     }
-    printf("FINISHED BUILDING STRING!!!\n");
     inst->nums[str_len] = 0;
     return 1;
 }
@@ -305,7 +310,6 @@ int is_number(char *str) {
 
 int is_operand_number(char *str) {
     char *conv_ptr;
-    printf("STR:%s\n",str);
     if (str != NULL && str[0] == '#') {
         str++;
         if (*str != '\0') {
@@ -357,7 +361,6 @@ int add_machine_code_cmd(converted_line **code_lines, unsigned short num, char *
         }
         strcpy((*code_lines + *IC)->label, str);  
     }
-    printf("ADDED MACHINE CODE %d LINE %d\n",num,line);
     return 1; 
 }
 
@@ -383,7 +386,6 @@ command *create_command(char *buffer, char *error_msg){
     buffer_copy = (char *)malloc(strlen(buffer) + 1);
     strcpy(buffer_copy, buffer);
     cmd_part = strtok(buffer_copy, " \n");
-    printf("cmdpart: %s\n",cmd_part);
     colon_pos = strchr(buffer_copy, ':');
     if (colon_pos != NULL) {
         if (*(colon_pos + 1) != ' ' && *(colon_pos + 1) != '\0') {
@@ -392,7 +394,7 @@ command *create_command(char *buffer, char *error_msg){
         }
         label = buffer_copy;
         if (!validate_label_declaration(label)) {
-            strcpy(error_msg, "Illegal label declaration");
+            sprintf(error_msg, "Illegal label declaration: %s",label);
             free(cmd);
             return NULL;
         }
@@ -402,6 +404,7 @@ command *create_command(char *buffer, char *error_msg){
     else{cmd->cmd_label = NULL;}
     cmd->opcode = which_opcode(cmd_part);
     if (cmd->opcode == -1){
+        sprintf(error_msg, "Inavalid opcode: %s",cmd_part);
         free(cmd);
         return NULL;
     }
@@ -441,20 +444,13 @@ command *create_command(char *buffer, char *error_msg){
         }
 
         arg1 = strtok(cmd_part, ",");
-        printf("ARG1: %s\n",arg1);
-        if (strchr(arg1, ' ')) {
-            
-            /*HANDLE IF THERES A TRAILING SPACE*/
-        }
         if (!is_legal_operand(arg1)) {
             sprintf(error_msg, "The first operand '%s' isn't legal",arg1);
             free(cmd);
             return NULL;
         }
-        printf("legal arg1\n");
         strtok(buffer, ",");
         arg2 = strtok(NULL," \n");
-        printf("ARG2: %s.\n",arg2);
         if (strtok(NULL, "\n")) {
             strcpy(error_msg, "Extra text after arguments");
             free(cmd);
@@ -465,9 +461,7 @@ command *create_command(char *buffer, char *error_msg){
             free(cmd);
             return NULL;
         }
-        printf("legal arg2\n");
     }
-    printf("Before switch-opcode:%d\n",cmd->opcode);
     switch (cmd->opcode){
         case 1:{
             cmd->cmd_src = arg1;
@@ -544,7 +538,6 @@ command *create_command(char *buffer, char *error_msg){
             return NULL;
         }
     }
-    printf("created cmd\n");
     return cmd;
 }
 
@@ -554,10 +547,9 @@ unsigned short convert_reg_to_binary(command *cmd, int is_src) {
     int reg1, reg2;
     unsigned short n_reg_src, n_reg_dest;
     n_reg_src = n_reg_dest = 0;
-    printf("HERE WITH CMD:%s. ALREADY:%d\n",cmd->cmd_dst,cmd->already_done);
     if (is_src) {
         if ((reg1 = which_reg(cmd->cmd_src)) >= 0) {
-            n_reg_src = reg1 << 6;
+            n_reg_src = reg1 << 2*ARE_BITS;
         }
         if ((reg2 = which_reg(cmd->cmd_dst)) >= 0) {
             n_reg_dest = reg2 << ARE_BITS;
@@ -567,7 +559,7 @@ unsigned short convert_reg_to_binary(command *cmd, int is_src) {
     }
     else if (cmd->already_done == 0) {
         if ((reg2 = which_reg(cmd->cmd_dst)) >= 0) {
-            n_reg_dest = reg2 << 3;
+            n_reg_dest = reg2 << ARE_BITS;
         }
         return n_reg_dest;
     }
@@ -578,9 +570,7 @@ int add_information_line(converted_line **code_lines, command *cmd, int *IC, int
     unsigned short num;
     char *arg, numeric_value[1000];
     arg = (is_src) ? cmd->cmd_src : cmd->cmd_dst;
-    printf("ARG:%s.\n",arg);
     if (which_reg(arg) >= 0 && (num = convert_reg_to_binary(cmd, is_src)) != 65535) {
-        printf("REG WITH ARG:%s.\n",arg);
         (*IC)++;
         num = num | n_are;
         if (add_machine_code_cmd(code_lines, num, NULL, IC, line) == 0) {
@@ -588,14 +578,12 @@ int add_information_line(converted_line **code_lines, command *cmd, int *IC, int
         }
     }
     else if (which_reg(arg)==-1 && validate_label(arg)) {
-        printf("LABEL WITH ARG:%s.\n",arg);
         (*IC)++;
         if (add_machine_code_cmd(code_lines, 2, arg, IC, line) == 0) {
             return 0;
         }
     }
     else if (is_operand_number(arg)) {
-        printf("NUMBER WITH ARG:%s.\n",arg);
         strcpy(numeric_value, arg + 1); 
         (*IC)++;
         if (add_machine_code_cmd(code_lines, (atoi(numeric_value) << ARE_BITS) | n_are, NULL, IC, line) == 0) {
@@ -612,9 +600,9 @@ int merge_all_lines(converted_line **code_lines, converted_line *data, int IC, i
         return 0;
     }
     for (i = 0; i < DC; i++) {
-        (*code_lines + IC + i + 1)->label = (data + i)->label;
-        (*code_lines + IC + i + 1)->line_num = (data + i)->line_num;
-        (*code_lines + IC + i + 1)->short_num = (data + i)->short_num;
+        (*code_lines + IC + i + 1)->label = data[i].label;
+        (*code_lines + IC + i + 1)->line_num = data[i].line_num;
+        (*code_lines + IC + i + 1)->short_num = data[i].short_num;
     }
     return 1; 
 }
@@ -631,7 +619,9 @@ void create_ob_file(converted_line *code_lines,int IC, int DC,char *filename){
         general_errors(error_buffer);
         return ;
     }
-    fprintf(file, "  %d %d\n", IC + 1, DC);
+    if (IC+1<100){fprintf(file, "  %d %d\n", IC + 1, DC);}
+    else if (IC+1<1000){fprintf(file, " %d %d\n", IC + 1, DC);}
+    else{fprintf(file, "%d %d\n", IC + 1, DC);}
     for (i = 0; i < IC + DC; i++) {
         fprintf(file, "%04d %05o\n", i + IC_INIT, code_lines[i].short_num & 0x7FFF);
     }
@@ -642,7 +632,7 @@ void create_ob_file(converted_line *code_lines,int IC, int DC,char *filename){
 void free_machine_code(converted_line *code_lines, int IC_DC){
     int i;
     for (i = 0; i <= IC_DC; i++) {
-        if (code_lines[i].label != NULL) {
+        if (code_lines[i].label != NULL && code_lines[i].short_num !=0) {
             free(code_lines[i].label);
         }
     }

@@ -35,38 +35,33 @@ char *generate_file_name(char *orig_name, char *new_end) {
 }
 
 char *delete_extra_spaces_from_str(char str[]){
-    
-    int len = strlen(str);
-    int x = 0, i;
-    int spaceEncountered = 0;
-    /* Allocate memory for the new string*/
-    char *result = manual_malloc((len+1) * sizeof(char));
+    char *src = str;  
+    char *dest = str; 
+    int in_space_sequence = 0;
+    while (isspace(*src)) {
+        src++;
+    }
 
-    /* Remove leading spaces*/
-    for (i = 0; i < len && isspace(str[i]); i++);
-
-    /* Traverse the input string*/
-    for (; i < len; i++) {
-        if (!isspace(str[i])) {
-            /* Copy non-space characters*/
-            result[x++] = str[i];
-            spaceEncountered = 0;
-        } else if (!spaceEncountered) {
-            /* Copy a single space if not a leading space*/
-            result[x++] = ' ';
-            spaceEncountered = 1;
+    while (*src != '\0') {
+        if (isspace(*src)) {
+            if (!in_space_sequence) {
+                *dest++ = ' ';
+                in_space_sequence = 1;
+            }
+        } else {
+            *dest++ = *src;
+            in_space_sequence = 0;
         }
+        src++;
     }
 
-    /* Remove trailing spaces*/
-    if (x > 0 && result[x-1] == ' ') {
-        x--;
+    if (dest > str && *(dest - 1) == ' ') {
+        dest--;
     }
 
-    /* Null-terminate the resulting string*/
-    result[x] = '\n';
-
-    return result;
+    *dest++ = '\n';
+    *dest = '\0';
+    return str;
 }
 
 char *delete_extra_spaces_from_file(char as_file[]){
@@ -118,4 +113,57 @@ char *delete_extra_spaces_from_file(char as_file[]){
     fclose(file);
     fclose(file_temp);
     return output_file;
+}
+
+void delete_extra_line(char *filnename){
+    FILE *file, *temp;
+    char line[MAX_LINE_LENGTH],error_msg[INITIAL_BUFFER_SIZE];
+    char **lines = NULL;
+    size_t count = 0, i;
+
+    file = fopen(filnename, "r");
+    if (file == NULL) {
+        sprintf(error_msg,"Couldn't open file %s", filnename);
+        general_errors(error_msg);
+        return ;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        lines = realloc(lines, sizeof(char*) * (count + 1));
+        if (lines == NULL) {
+            general_errors("Failed to allocate memory");
+            fclose(file);
+            return ;
+        }
+        lines[count] = strdup(line);
+        if (lines[count] == NULL) {
+            sprintf(error_msg,"Failed to duplicate line %ld in file %s",count, filnename);
+            general_errors(error_msg);
+            fclose(file);
+            return ;
+        }
+        count++;
+    }
+    fclose(file);
+
+    temp = fopen(filnename, "w");
+    if (temp == NULL) {
+        sprintf(error_msg,"Couldn't open file %s", filnename);
+        general_errors(error_msg);
+        perror("Failed to open the file");
+        return ;
+    }
+
+    for (i = 0; i < count - 1; i++) {
+        fputs(lines[i], temp);
+        free(lines[i]); 
+    }
+    lines[count-1][strlen(lines[count-1]) -1] = '\0'; 
+    fputs(lines[count-1], temp);
+    free(lines[count-1]); 
+    free(lines); 
+
+    fclose(temp);
+
+    return ;
 }

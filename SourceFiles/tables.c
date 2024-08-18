@@ -11,27 +11,17 @@ void insert_general_label(gen_label_table **table, int cnt, instruction *inst, i
     int label_length;
     char copy[MAX_LABEL_LENGTH];
     strcpy(copy,name);
-    printf("INSERTING ENTRY: %s\n",copy);
     tbl = *table;
 
-    /* Update the assembly_line field of the last entry in the table */
     (*table + cnt - 1)->line = line;
-
-    /* Calculate the length of the label_name */
     label_length = strlen(copy) + 1;
-
-    /* Allocate memory for the label_name and copy the label from 'inst' */
     (*table + cnt - 1)->name = manual_malloc(label_length * sizeof(char));
     if ((*table + cnt - 1)->name == NULL) {
         return ;
     }
-    /*Copy the data into the table*/
     strcpy((*table + cnt - 1)->name, copy);
-
-    /* Resize the table to accommodate the new entry */
     *table = realloc(*table, (cnt + 1) * sizeof(gen_label_table));
     if (table == NULL) {
-        /*Failed to allocate memory*/
         general_errors("failed to allocate memory");
         free(tbl);
     }
@@ -43,7 +33,6 @@ int insert_label_table(label_table **label_tbl, int labels_cnt, char *label, int
     char copy[MAX_LABEL_LENGTH];
     int i;
     strcpy(copy,label);
-    printf("INSERTING LABEL:%s\n",label);
     for (i = 0; i < labels_cnt - 1; i++) {
         if (strcmp((*label_tbl + i)->name,label) == 0) {
             sprintf(error_msg, "The label %s is defined twice - in line %d and line %d\n",label,line,(*label_tbl + i)->line);
@@ -74,7 +63,6 @@ int insert_label_table(label_table **label_tbl, int labels_cnt, char *label, int
         }
         strcpy((*label_tbl + labels_cnt - 1)->name, copy);
     }
-    printf("INSERTED LABEL:%s\n",label);
     return 1;
 }
 
@@ -82,15 +70,6 @@ unsigned short command_to_short(gen_label_table **externs_table,int externs_cnt,
     unsigned short n_src, n_op, n_dest;
     int extern_match=0,entry_match=0, i,flag=0;
     n_src = n_op = n_dest = 0;
-    printf("N_ARE:%d\n",*n_are);
-    printf("SRC:%s\n",cmd->cmd_src);
-    printf("RESULT:%d\n",which_reg(cmd->cmd_src));
-    printf("DST:%s\n",cmd->cmd_dst);
-    printf("RESULT:%d\n",which_reg(cmd->cmd_dst));
-    printf("EXTERNS CNT:%d, ENTRIES CNT:%d\n",externs_cnt,entries_cnt);
-    if (entries_cnt==1){
-        printf("ENTRY:%s\n",(entries_table[0]->name));
-    }
     if (which_reg(cmd->cmd_src) >= 0) {
         flag=1;
         if (cmd->cmd_src[0] == '*'){n_src = (short) (4 << 7);}
@@ -145,21 +124,18 @@ unsigned short command_to_short(gen_label_table **externs_table,int externs_cnt,
     }
     
     n_op = (short) (cmd->opcode) << 11; 
-    printf("N_ARE:%d\n",*n_are);
-    printf("N_DESR:%d\n",n_dest);
     return ((n_op | n_src) | (n_dest | 4));
 }
 
 void update_labels(label_table *label_tbl, int lines, int IC) {
     int i;
     for (i = 0; i < lines; i++) {
-        if ((label_tbl + i)->is_data_line) {
-            (label_tbl + i)->address += IC + 1;
+        if (label_tbl[i].is_data_line) {
+            label_tbl[i].address += IC + 1;
         }
     }
     for (i = 0; i < lines; i++) {
-        (label_tbl + i)->address += IC_INIT;
-        printf("LABEL %s ADDRESS:%d\n",(label_tbl + i)->name,(label_tbl + i)->address);
+        label_tbl[i].address += IC_INIT;
     }
 }
 
@@ -180,18 +156,16 @@ void handle_labels(converted_line *code_lines, label_table *label_tbl, int label
     int i, j, found;
     for (i = 0; i <= IC; i++) {
         found = 0;
-        if ((code_lines + i)->label != NULL && (code_lines + i)->short_num == 2) {
-            printf("SEARCHING %s\n",(code_lines + i)->label);
+        if (code_lines[i].label != NULL && code_lines[i].short_num == 2) {
             for (j = 0; j < labels_cnt && found == 0; j++) {
-                if (strcmp((code_lines + i)->label, (label_tbl + j)->name) == 0) {
-                    (code_lines + i)->short_num |= (label_tbl + j)->address << ARE_BITS;
-                    printf("FOUND %s, ADDRESS:%d\n",(code_lines + i)->label,(code_lines + i)->short_num);
+                if (strcmp(code_lines[i].label, label_tbl [j].name) == 0) {
+                    code_lines[i].short_num |= label_tbl [j].address << ARE_BITS;
                     found = 1;
                 }
             }
             if (!found) {
-                sprintf(error_msg,"The label %s isn't defined in the given file",(code_lines + i)->label);
-                input_errors(filename,(code_lines + i)->line_num, error_msg);
+                sprintf(error_msg,"The label %s isn't defined in the given file",code_lines[i].label);
+                input_errors(filename,code_lines[i].line_num, error_msg);
             }
         }
     }
@@ -222,6 +196,7 @@ void create_ext_file(converted_line *code_lines,int IC_DC,gen_label_table *exter
     }
     fclose(file);
     if(!written){remove(ext_file);}
+    else{delete_extra_line(ext_file);}
 }
 
 
@@ -250,6 +225,7 @@ void create_ent_file(gen_label_table *entries_table, int entries_cnt,label_table
     }
     fclose(file);
     if(!written){remove(ent_file);}
+    else{delete_extra_line(ent_file);}
 }
 
 void free_label_table(label_table *label_tbl, int labels_cnt){
