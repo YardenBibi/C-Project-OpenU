@@ -140,7 +140,7 @@ int ensure_macr_no_label(macr_node *head_macr, char *am_file){
 
     while (fgets(buffer, MAX_LINE_LENGTH, file) != NULL) {
         line++;
-        colon_pos = strchr(buffer, ':');  
+        colon_pos = strchr(buffer, ':');  /* Check is there's a label in the line */
         if (colon_pos != NULL) {
             prefix_len = colon_pos - buffer;
             strncpy(prefix, buffer, prefix_len);
@@ -226,7 +226,7 @@ char* get_macr_code(char * file_name,FILE *file, int *line_number) {
     size_t content_size = INITIAL_BUFFER_SIZE;
     size_t content_length = 0;
     size_t line_length;
-    char line[256];
+    char line[INITIAL_BUFFER_SIZE];
     char *new_content;
     char *content = malloc(INITIAL_BUFFER_SIZE);
     

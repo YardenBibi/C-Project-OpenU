@@ -28,14 +28,17 @@ opcode OPCODES[] = {
         {"stop", 0}
 };
 
+/* Define the instructions */
 char *INSTUCTIONS[] = {".data", ".string", ".entry", ".extern"};
+
+/* Define the registers */
 char *REGS[] = {"*r0", "r0", "*r1", "r1", "*r2", "r2", "*r3", "r3", "*r4", "r4", \
                 "*r5", "r5", "*r6", "r6", "*r7", "r7"}; 
 
 int name_as_inst(char *str) {
     int i;
     for (i = 0; i < INSTR_CNT; i++) {
-        if (strcmp(str, INSTUCTIONS[i]) == 0) {
+        if (strcmp(str, INSTUCTIONS[i]) == 0) { /* Found match of instructions */
             return 1;
         }
     }
@@ -46,7 +49,7 @@ int which_opcode(char *str) {
     int i;
 
     for (i = 0; i < OPCODES_CNT; i++) {
-        if (strcmp(str, OPCODES[i].opcode) == 0) {
+        if (strcmp(str, OPCODES[i].opcode) == 0) { /* Found match of opcode */
             return i; 
         }
     }
@@ -61,7 +64,7 @@ int which_reg(char *str) {
     }
 
     for (i = 0; i < REG_CNT*2; i++) {
-        if (strcmp(str, REGS[i]) == 0) {
+        if (strcmp(str, REGS[i]) == 0) { /* Found match of register */
             return i/2; 
         }
     }
@@ -69,13 +72,15 @@ int which_reg(char *str) {
 }
 
 int validate_label(char *label){
+    /* Checks that label template is legal */
     if (label == NULL || (strlen(label) > MAX_LABEL_LENGTH) || \
         (which_opcode(label) >= 0) || (name_as_inst(label))){
             return 0;
     }
+
     if ((!isalpha(*label)) & !(isdigit(*label))){return 0;}
     while (*(++label) != '\0' && *(label) != ' ') {
-        if ((isalpha(*label)) || (isdigit(*label))){
+        if ((isalpha(*label)) || (isdigit(*label))){ 
             continue;
         }
         return 0;
@@ -131,6 +136,7 @@ instruction *create_instruction(char *buffer, int is_entry, char *error_msg){
 }
 
 instruction *create_instruction2(char *buffer, char *error_msg){
+    
     instruction *inst;
     char buffer_copy[MAX_LINE_LENGTH],*label,*colon_pos;
     strcpy(buffer_copy,buffer);
@@ -152,7 +158,7 @@ instruction *create_instruction2(char *buffer, char *error_msg){
             return NULL;
         }
         inst->inst_label = label;
-        label = strtok(NULL, " \n");
+        label = strtok(NULL, " \n"); /*extract data part of the line*/
     }
     else {
         inst->inst_label = NULL;
@@ -180,6 +186,7 @@ int build_array(char *buffer, instruction *inst, char *error_msg){
     
     array_str = strtok(NULL, "\n");
     if (!isdigit(array_str[0]) && array_str[0] != '-'){return 0;}
+    /* Validates that the array syntax is valid */
     for (i = 0; array_str[i]; i++) {
         if(array_str[i] == ' '){
                 spaceFlag=1;
@@ -300,7 +307,7 @@ int coma_more_than_one(char *str) {
 int is_number(char *str) {
     char *conv_ptr;
     if (str != NULL) {
-        strtol(str, &conv_ptr, 10);
+        strtol(str, &conv_ptr, 10);  /* Try to convert string to number */
         if (*conv_ptr == '\0' || *conv_ptr == ' ') {
             return 1; 
         }
@@ -367,7 +374,7 @@ int add_machine_code_cmd(converted_line **code_lines, unsigned short num, char *
 int inc_mem(converted_line **lines, int counter) {
     converted_line *ptr;
     ptr = *lines;
-    *lines = realloc(*lines, (counter + 1) * sizeof(converted_line));
+    *lines = realloc(*lines, (counter + 1) * sizeof(converted_line));  /* try to perform realloc */
     if (*lines == NULL) {
         general_errors("Failed to allocate memory");
         free(ptr);
@@ -386,7 +393,7 @@ command *create_command(char *buffer, char *error_msg){
     buffer_copy = (char *)malloc(strlen(buffer) + 1);
     strcpy(buffer_copy, buffer);
     cmd_part = strtok(buffer_copy, " \n");
-    colon_pos = strchr(buffer_copy, ':');
+    colon_pos = strchr(buffer_copy, ':');  /* Checks if there's a label at the begin of the command */
     if (colon_pos != NULL) {
         if (*(colon_pos + 1) != ' ' && *(colon_pos + 1) != '\0') {
             memmove(colon_pos + 2, colon_pos + 1, strlen(colon_pos + 1) + 1);  
@@ -402,7 +409,8 @@ command *create_command(char *buffer, char *error_msg){
         cmd_part = strtok(NULL, " \n");
     }
     else{cmd->cmd_label = NULL;}
-    cmd->opcode = which_opcode(cmd_part);
+
+    cmd->opcode = which_opcode(cmd_part);  /* check if op command is valid */
     if (cmd->opcode == -1){
         sprintf(error_msg, "Inavalid opcode: %s",cmd_part);
         free(cmd);
@@ -462,15 +470,15 @@ command *create_command(char *buffer, char *error_msg){
             return NULL;
         }
     }
-    switch (cmd->opcode){
-        case 1:{
+    switch (cmd->opcode){ /* Checking arguments according to each opcode, some op commands has same behaviour */
+        case 1:{ /* cmp */
             cmd->cmd_src = arg1;
             cmd->cmd_dst = arg2;
             break;
         }
-        case 0:
-        case 2:
-        case 3:{
+        case 0: /* mov */
+        case 2: /* add */
+        case 3:{ /* sub */
             if ((which_reg(arg2) >= 0) || validate_label(arg2)) {
                 cmd->cmd_src = arg1;
                 cmd->cmd_dst = arg2;
@@ -483,7 +491,7 @@ command *create_command(char *buffer, char *error_msg){
             }
             break;
         }
-        case 4:{
+        case 4:{ /* lea */
             if (!validate_label(arg1)){
                 sprintf(error_msg, "In the given opcode %d - The operand %s isn't a label", cmd->opcode, arg2);
                 free(cmd);
@@ -500,7 +508,7 @@ command *create_command(char *buffer, char *error_msg){
             cmd->cmd_dst = arg2;
             break;
         }
-        case 12: {
+        case 12: { /* prn */
             if (is_legal_single_operand(cmd_part)) {
                 cmd->cmd_src = NULL;
                 cmd->cmd_dst = cmd_part;
@@ -512,14 +520,14 @@ command *create_command(char *buffer, char *error_msg){
             }
             break;
         }
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 13: {
+        case 5: /* clr */
+        case 6: /* not */
+        case 7: /* inc */
+        case 8: /* dec */
+        case 9: /* jmp */
+        case 10: /* bne */
+        case 11: /* cmp */
+        case 13: { /* red */
             if ((which_reg(cmd_part) >= 0 && cmd_part[0] != '*') || validate_label(cmd_part)) {
                 cmd->cmd_src = NULL;
                 cmd->cmd_dst = cmd_part;
@@ -532,7 +540,7 @@ command *create_command(char *buffer, char *error_msg){
             break;
         }
 
-        default :{
+        default :{ /* opcode number isn't valid */
             sprintf(error_msg, "The given opcode %d isn't valid", cmd->opcode);
             free(cmd);
             return NULL;
@@ -549,21 +557,21 @@ unsigned short convert_reg_to_binary(command *cmd, int is_src) {
     n_reg_src = n_reg_dest = 0;
     if (is_src) {
         if ((reg1 = which_reg(cmd->cmd_src)) >= 0) {
-            n_reg_src = reg1 << 2*ARE_BITS;
+            n_reg_src = reg1 << 2*ARE_BITS; /* shifts 6 bits to src reg position */
         }
         if ((reg2 = which_reg(cmd->cmd_dst)) >= 0) {
-            n_reg_dest = reg2 << ARE_BITS;
+            n_reg_dest = reg2 << ARE_BITS; /* shifts 3 bits to dest reg position */
         }
-        cmd->already_done = 1; 
+        cmd->already_done = 1; /* indacte that we handled both registers of the command to avoid duplicates*/
         return (n_reg_src | n_reg_dest);
     }
-    else if (cmd->already_done == 0) {
+    else if (cmd->already_done == 0) { /* already handles both registers of the command */
         if ((reg2 = which_reg(cmd->cmd_dst)) >= 0) {
             n_reg_dest = reg2 << ARE_BITS;
         }
         return n_reg_dest;
     }
-    return 65535;
+    return 65535; /* a number that indicates a "bad" result of the function */
 }
 
 int add_information_line(converted_line **code_lines, command *cmd, int *IC, int is_src, int line, unsigned short n_are) {
@@ -599,7 +607,7 @@ int merge_all_lines(converted_line **code_lines, converted_line *data, int IC, i
     if (inc_mem(code_lines, IC + DC) == 0) {
         return 0;
     }
-    for (i = 0; i < DC; i++) {
+    for (i = 0; i < DC; i++) { /*Add data lines at the end of the translation*/
         (*code_lines + IC + i + 1)->label = data[i].label;
         (*code_lines + IC + i + 1)->line_num = data[i].line_num;
         (*code_lines + IC + i + 1)->short_num = data[i].short_num;
@@ -619,9 +627,15 @@ void create_ob_file(converted_line *code_lines,int IC, int DC,char *filename){
         general_errors(error_buffer);
         return ;
     }
-    if (IC+1<100){fprintf(file, "  %d %d\n", IC + 1, DC);}
-    else if (IC+1<1000){fprintf(file, " %d %d\n", IC + 1, DC);}
-    else{fprintf(file, "%d %d\n", IC + 1, DC);}
+    if (IC+1<100){
+        fprintf(file, "  %d %d\n", IC + 1, DC);
+    }
+    else if (IC+1<1000){
+        fprintf(file, " %d %d\n", IC + 1, DC);
+    }
+    else{
+        fprintf(file, "%d %d\n", IC + 1, DC);
+    }
     for (i = 0; i < IC + DC; i++) {
         fprintf(file, "%04d %05o\n", i + IC_INIT, code_lines[i].short_num & 0x7FFF);
     }

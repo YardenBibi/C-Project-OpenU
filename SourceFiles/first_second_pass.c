@@ -146,7 +146,7 @@ void first_second_pass(char *dot_am_file){
         free(cmd);
     }
 
-    if (IC + DC > MAX_IC - IC_INIT) {
+    if (IC + DC > MAX_IC - IC_INIT) { /* Means we got out of the loop due to memory limitations*/
         sprintf(error_msg, "IC+DC size %d exceeded limit of %d",IC+DC,MAX_IC - IC_INIT);
         general_errors(error_msg);
         return ;
@@ -159,7 +159,7 @@ void first_second_pass(char *dot_am_file){
     handle_externs_address(code_lines, externs_table, externs_cnt, IC + DC);
     handle_labels(code_lines, label_tbl, labels_cnt, IC, dot_am_file,error_msg);
 
-    if(success && strlen(error_msg)==0){
+    if(success && strlen(error_msg)==0){ /*Condtion for success run - creating output files*/
         create_ob_file(code_lines,IC,DC,dot_am_file);
         create_ext_file(code_lines,IC+DC,externs_table, externs_cnt, dot_am_file);
         create_ent_file(entries_table, entries_cnt,label_tbl, labels_cnt, dot_am_file);

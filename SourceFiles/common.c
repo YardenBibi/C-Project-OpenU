@@ -89,7 +89,7 @@ char *delete_extra_spaces_from_file(char as_file[]){
         return NULL;
     }
 
-    while (fgets(buffer, 999, file) != NULL) {
+    while (fgets(buffer, INITIAL_BUFFER_SIZE, file) != NULL) {
         line++;
         if (strlen(buffer) > MAX_LINE_LENGTH) {
             input_errors(as_file, line, "Line length isn't valid");
@@ -99,12 +99,14 @@ char *delete_extra_spaces_from_file(char as_file[]){
             free(output_file);
             return NULL;
         }
-            /* replacing a comment line with newline character */
-        else if (*buffer == ';') {
+        else if (*buffer == ';') { /* Checks if it a comment line */
            continue;
         } else {
             /* removing extra unnecessary white-spaces from the line */
             fixed_line = delete_extra_spaces_from_str(buffer);
+            if (*fixed_line == ';') { /* Checks if it a comment line after cleaning spaces*/
+                continue;
+            }
         }
         /* saving the changed line to the new file */
         fprintf(file_temp, "%s", fixed_line);

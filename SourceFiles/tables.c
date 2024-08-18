@@ -96,8 +96,8 @@ unsigned short command_to_short(gen_label_table **externs_table,int externs_cnt,
     }
     
     if (which_reg(cmd->cmd_dst) >= 0) {
-        if (cmd->cmd_dst[0] == '*'){n_dest = (short) (4 << 3);}
-        else                       {n_dest = (short) (8 << 3);}
+        if (cmd->cmd_dst[0] == '*'){n_dest = (short) (4 << ARE_BITS);}
+        else                       {n_dest = (short) (8 << ARE_BITS);}
         *n_are=4;
     }
     else if (validate_label(cmd->cmd_dst)) {
@@ -189,7 +189,7 @@ void create_ext_file(converted_line *code_lines,int IC_DC,gen_label_table *exter
             for (j = 0; j < externs_cnt; j++) {
                 if (strcmp(code_lines[i].label, externs_table[j].name) == 0) {
                     fprintf(file, "%s\t%d\n", externs_table[j].name, IC_INIT + i);
-                    written = 1;
+                    written = 1; /* Indicates there's content in ent file */
                 }
             }
         }
@@ -218,7 +218,7 @@ void create_ent_file(gen_label_table *entries_table, int entries_cnt,label_table
             for (j = 0; j < entries_cnt; j++) {
                 if (strcmp(label_tbl[i].name, entries_table[j].name) == 0) {
                     fprintf(file, "%s\t%d\n", entries_table[j].name, label_tbl[i].address);
-                    written = 1;
+                    written = 1; /* Indicates there's content in ent file */
                 }
             }
         }
