@@ -1,16 +1,12 @@
 #ifndef C_PROJECT_OPENU_GLOBALS_H
 #define C_PROJECT_OPENU_GLOBALS_H
 
-/* Maximum length of a label in command line  */
 #define MAX_LABEL_LENGTH 31
 
-/* Maximum length of a single command line  */
 #define MAX_LINE_LENGTH 81
 
-/* Default IC value */
 #define IC_INIT 100
 
-/* arbitrary very big number for line length */
 #define INITIAL_BUFFER_SIZE 1000
 
 #define OPCODES_CNT 16
