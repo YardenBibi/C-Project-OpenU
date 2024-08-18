@@ -91,6 +91,7 @@ char *delete_extra_spaces_from_file(char as_file[]){
 
     while (fgets(buffer, INITIAL_BUFFER_SIZE, file) != NULL) {
         line++;
+        if(buffer[0]=='\n'){continue;}
         if (strlen(buffer) > MAX_LINE_LENGTH) {
             input_errors(as_file, line, "Line length isn't valid");
             fclose(file);

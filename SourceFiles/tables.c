@@ -68,27 +68,13 @@ int insert_label_table(label_table **label_tbl, int labels_cnt, char *label, int
 
 unsigned short command_to_short(gen_label_table **externs_table,int externs_cnt, gen_label_table **entries_table,int entries_cnt, command *cmd, unsigned short *n_are) {
     unsigned short n_src, n_op, n_dest;
-    int extern_match=0,entry_match=0, i,flag=0;
     n_src = n_op = n_dest = 0;
     if (which_reg(cmd->cmd_src) >= 0) {
-        flag=1;
         if (cmd->cmd_src[0] == '*'){n_src = (short) (4 << 7);}
         else                       {n_src = (short) (8 << 7);}
     }
     else if (validate_label(cmd->cmd_src)) {
         n_src = (short) (2 << 7);  
-        for (i = 0; i < externs_cnt; i++) {
-            if (externs_table[i] != NULL && externs_table[i]->name != NULL && strcmp(externs_table[i]->name, cmd->cmd_src) == 0) {
-            extern_match = 1; 
-            }
-        }
-        for (i = 0; i < entries_cnt; i++) {
-            if (entries_table[i] != NULL && entries_table[i]->name != NULL && strcmp(entries_table[i]->name, cmd->cmd_src) == 0) {
-            entry_match = 1; 
-            }
-        }
-        if (extern_match){*n_are=1;}
-        else if (entry_match){*n_are=2;}
     }
     
     else if (is_operand_number(cmd->cmd_src)) {
@@ -102,21 +88,7 @@ unsigned short command_to_short(gen_label_table **externs_table,int externs_cnt,
     }
     else if (validate_label(cmd->cmd_dst)) {
         n_dest = (short) (2 << 3); 
-        for (i = 0; i < externs_cnt; i++) {
-            if (externs_table[i] != NULL && externs_table[i]->name != NULL && strcmp(externs_table[i]->name, cmd->cmd_dst) == 0) {
-            extern_match = 1; 
-            }
-        }
-        for (i = 0; i < entries_cnt; i++) {
-            if (entries_table[i] != NULL && entries_table[i]->name != NULL && strcmp(entries_table[i]->name, cmd->cmd_dst) == 0) {
-            entry_match = 1; 
-            }
-
-        }
-        if (!flag){
-            if (extern_match){*n_are=1;}
-            else if (entry_match){*n_are=2;}
-        }
+        
     }
          
     else if (is_operand_number(cmd->cmd_dst) && cmd->opcode<=5) {

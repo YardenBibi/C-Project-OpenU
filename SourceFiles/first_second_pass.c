@@ -55,6 +55,7 @@ void first_second_pass(char *dot_am_file){
     while (fgets(buffer, MAX_LINE_LENGTH, file) != NULL && IC + DC <= MAX_IC - IC_INIT) {
         n_are=4;
         line++;
+        if(buffer[0]=='\n'){continue;}
         memset(error_msg, 0, sizeof(error_msg));
         if (strchr(buffer, '.')) {
             if (strstr(buffer, ".entry")){
@@ -94,7 +95,8 @@ void first_second_pass(char *dot_am_file){
                     }
                     continue;
                 }
-                if (inst->inst_label !=NULL && !insert_label_table(&label_tbl, ++labels_cnt, inst->inst_label, DC, line, 1, error_msg)){
+                if (inst->inst_label !=NULL){strcpy(copy,inst->inst_label);}
+                if (inst->inst_label !=NULL && !insert_label_table(&label_tbl, ++labels_cnt, copy, DC, line, 1, error_msg)){
                     labels_cnt--;
                     general_errors(error_msg);
                     success = 0;

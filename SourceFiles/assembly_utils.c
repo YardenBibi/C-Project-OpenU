@@ -77,7 +77,6 @@ int validate_label(char *label){
         (which_opcode(label) >= 0) || (name_as_inst(label))){
             return 0;
     }
-
     if ((!isalpha(*label)) & !(isdigit(*label))){return 0;}
     while (*(++label) != '\0' && *(label) != ' ') {
         if ((isalpha(*label)) || (isdigit(*label))){ 
@@ -526,8 +525,8 @@ command *create_command(char *buffer, char *error_msg){
         case 8: /* dec */
         case 9: /* jmp */
         case 10: /* bne */
-        case 11: /* cmp */
-        case 13: { /* red */
+        case 11: /* red */
+        case 13: { /* jsr */
             if ((which_reg(cmd_part) >= 0 && cmd_part[0] != '*') || validate_label(cmd_part)) {
                 cmd->cmd_src = NULL;
                 cmd->cmd_dst = cmd_part;
